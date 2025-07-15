@@ -67,7 +67,7 @@ async def run_workflow(
         async_mode=async_mode,
         num_threads=num_threads,
     )
-
+    print(output)
     await write_table_to_storage(output, "community_reports", context.output_storage)
 
     return WorkflowFunctionOutput(result=output)
@@ -107,6 +107,7 @@ async def create_community_reports(
         callbacks,
         max_input_length,
     )
+    # breakpoint()
 
     community_reports = await summarize_communities(
         nodes,

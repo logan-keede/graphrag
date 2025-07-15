@@ -313,6 +313,20 @@ class LocalSearchDefaults:
     chat_model_id: str = DEFAULT_CHAT_MODEL_ID
     embedding_model_id: str = DEFAULT_EMBEDDING_MODEL_ID
 
+@dataclass
+class RFFGSearchDefaults:
+    """Default values for local search."""
+
+    prompt: None = None
+    graphdb_connection_string: str = "neo4j://localhost:443"
+    text_unit_prop: float = 0.5
+    community_prop: float = 0.15
+    conversation_history_max_turns: int = 5
+    top_k_entities: int = 10
+    top_k_relationships: int = 10
+    max_context_tokens: int = 12_000
+    chat_model_id: str = DEFAULT_CHAT_MODEL_ID
+    embedding_model_id: str = DEFAULT_EMBEDDING_MODEL_ID
 
 @dataclass
 class OutputDefaults(StorageDefaults):
@@ -426,6 +440,7 @@ class GraphRagConfigDefaults:
     prune_graph: PruneGraphDefaults = field(default_factory=PruneGraphDefaults)
     cluster_graph: ClusterGraphDefaults = field(default_factory=ClusterGraphDefaults)
     umap: UmapDefaults = field(default_factory=UmapDefaults)
+    rffg_search: RFFGSearchDefaults = field(default_factory=RFFGSearchDefaults)
     local_search: LocalSearchDefaults = field(default_factory=LocalSearchDefaults)
     global_search: GlobalSearchDefaults = field(default_factory=GlobalSearchDefaults)
     drift_search: DriftSearchDefaults = field(default_factory=DriftSearchDefaults)

@@ -36,6 +36,10 @@ from graphrag.query.structured_search.local_search.mixed_context import (
 from graphrag.query.structured_search.local_search.search import LocalSearch
 from graphrag.vector_stores.base import BaseVectorStore
 
+from graphrag.query.structured_search.rffgraphrag.mixed_context import (
+    RFFGContext,)
+from neo4j import GraphDatabase
+from graphrag.query.structured_search.rffgraphrag.search import RFFGSearch
 
 def get_local_search_engine(
     config: GraphRagConfig,
@@ -93,6 +97,83 @@ def get_local_search_engine(
         context_builder_params={
             "text_unit_prop": ls_config.text_unit_prop,
             "community_prop": ls_config.community_prop,
+            "conversation_history_max_turns": ls_config.conversation_history_max_turns,
+            "conversation_history_user_turns_only": True,
+            "top_k_mapped_entities": ls_config.top_k_entities,
+            "top_k_relationships": ls_config.top_k_relationships,
+            "include_entity_rank": True,
+            "include_relationship_weight": True,
+            "include_community_rank": False,
+            "return_candidate_context": False,
+            "embedding_vectorstore_key": EntityVectorStoreKey.ID,  # set this to EntityVectorStoreKey.TITLE if the vectorstore uses entity title as ids
+            "max_context_tokens": ls_config.max_context_tokens,  # change this based on the token limit you have on your model (if you are using a model with 8k limit, a good setting could be 5000)
+        },
+        response_type=response_type,
+        callbacks=callbacks,
+    )
+
+
+def get_rffg_search_engine(
+    config: GraphRagConfig,
+    # reports: list[CommunityReport],
+    # text_units: list[TextUnit],
+    entities: list[Entity],
+    relationships: list[Relationship],
+    # covariates: dict[str, list[Covariate]],
+    response_type: str,
+    description_embedding_store: BaseVectorStore,
+    system_prompt: str | None = None,
+    callbacks: list[QueryCallbacks] | None = None,
+    selected_entities: list[str] | None = None
+) -> RFFGSearch:
+    """Create a local search engine based on data + configuration."""
+    model_settings = config.get_language_model_config(config.rffg_search.chat_model_id)
+
+    chat_model = ModelManager().get_or_create_chat_model(
+        name="rffg_search_chat",
+        model_type=model_settings.type,
+        config=model_settings,
+    )
+
+    embedding_settings = config.get_language_model_config(
+        config.rffg_search.embedding_model_id
+    )
+
+    embedding_model = ModelManager().get_or_create_embedding_model(
+        name="rffg_search_embedding",
+        model_type=embedding_settings.type,
+        config=embedding_settings,
+    )
+
+    token_encoder = tiktoken.get_encoding(model_settings.encoding_model)
+
+    ls_config = config.rffg_search
+
+    model_params = get_openai_model_parameters_from_config(model_settings)
+    graphdb_driver = GraphDatabase.driver(config.rffg_search.graphdb_connection_string)
+
+    return RFFGSearch(
+        model=chat_model,
+        system_prompt=system_prompt,
+        context_builder=RFFGContext(
+            graphdb_driver=graphdb_driver,
+            # community_reports=reports,
+            # text_units=text_units,
+            entities=entities,
+            relationships=relationships,
+            # covariates=covariates,
+            entity_text_embeddings=description_embedding_store,
+            embedding_vectorstore_key=EntityVectorStoreKey.ID,  # if the vectorstore uses entity title as ids, set this to EntityVectorStoreKey.TITLE
+            text_embedder=embedding_model,
+            token_encoder=token_encoder,
+            
+        ),
+        token_encoder=token_encoder,
+        model_params=model_params,
+        context_builder_params={
+            # "text_unit_prop": ls_config.text_unit_prop,
+            # "community_prop": ls_config.community_prop,
+            "selected_entities": selected_entities,
             "conversation_history_max_turns": ls_config.conversation_history_max_turns,
             "conversation_history_user_turns_only": True,
             "top_k_mapped_entities": ls_config.top_k_entities,

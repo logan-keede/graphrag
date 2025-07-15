@@ -151,7 +151,7 @@ class LocalSearch(BaseSearch[LocalContextBuilder]):
         history_messages = [
             {"role": "system", "content": search_prompt},
         ]
-
+        print("search prompt", search_prompt)
         for callback in self.callbacks:
             callback.on_context(context_result.context_records)
 

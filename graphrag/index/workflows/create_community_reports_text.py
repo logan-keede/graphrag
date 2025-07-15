@@ -89,6 +89,7 @@ async def create_community_reports_text(
     local_contexts = build_local_context(
         communities, text_units, nodes, max_input_length
     )
+    # breakpoint()
 
     community_reports = await summarize_communities(
         nodes,

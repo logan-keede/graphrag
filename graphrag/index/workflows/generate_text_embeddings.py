@@ -131,24 +131,26 @@ async def generate_text_embeddings(
             else None,
             "embed_column": "title",
         },
-        community_summary_embedding: {
-            "data": community_reports.loc[:, ["id", "summary"]]
-            if community_reports is not None
-            else None,
-            "embed_column": "summary",
-        },
-        community_full_content_embedding: {
-            "data": community_reports.loc[:, ["id", "full_content"]]
-            if community_reports is not None
-            else None,
-            "embed_column": "full_content",
-        },
+        # community_summary_embedding: {
+        #     "data": community_reports.loc[:, ["id", "summary"]]
+        #     if community_reports is not None
+        #     else None,
+        #     "embed_column": "summary",
+        # },
+        # community_full_content_embedding: {
+        #     "data": community_reports.loc[:, ["id", "full_content"]]
+        #     if community_reports is not None
+        #     else None,
+        #     "embed_column": "full_content",
+        # },
     }
 
     log.info("Creating embeddings")
     outputs = {}
+    # embedded_fields.remove(community_summary_embedding)
+    # embedded_fields.remove(community_full_content_embedding)
     for field in embedded_fields:
-        if embedding_param_map[field]["data"] is None:
+        if field not in embedding_param_map or embedding_param_map[field]["data"] is None:
             msg = f"Embedding {field} is specified but data table is not in storage. This may or may not be intentional - if you expect it to me here, please check for errors earlier in the logs."
             log.warning(msg)
         else:

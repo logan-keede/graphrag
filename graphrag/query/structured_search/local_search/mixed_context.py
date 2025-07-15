@@ -99,8 +99,8 @@ class LocalSearchMixedContext(LocalContextBuilder):
         max_context_tokens: int = 8000,
         text_unit_prop: float = 0.5,
         community_prop: float = 0.25,
-        top_k_mapped_entities: int = 10,
-        top_k_relationships: int = 10,
+        top_k_mapped_entities: int = 5,
+        top_k_relationships: int = 5,
         include_community_rank: bool = False,
         include_entity_rank: bool = False,
         rank_description: str = "number of relationships",
@@ -186,7 +186,7 @@ class LocalSearchMixedContext(LocalContextBuilder):
         if community_context.strip() != "":
             final_context.append(community_context)
             final_context_data = {**final_context_data, **community_context_data}
-
+        print(community_context)
         # build local (i.e. entity-relationship-covariate) context
         local_prop = 1 - community_prop - text_unit_prop
         local_tokens = max(int(max_context_tokens * local_prop), 0)
@@ -398,7 +398,7 @@ class LocalSearchMixedContext(LocalContextBuilder):
             context_name="Entities",
         )
         entity_tokens = num_tokens(entity_context, self.token_encoder)
-
+        print(entity_context)
         # build relationship-covariate context
         added_entities = []
         final_context = []
@@ -445,13 +445,13 @@ class LocalSearchMixedContext(LocalContextBuilder):
                 current_context.append(covariate_context)
                 current_context_data[covariate.lower()] = covariate_context_data
 
-            if total_tokens > max_context_tokens:
-                log.info("Reached token limit - reverting to previous context state")
-                break
+            # if total_tokens > max_context_tokens:
+            #     log.info("Reached token limit - reverting to previous context state")
+            #     break
 
             final_context = current_context
             final_context_data = current_context_data
-
+        print('final_context', final_context)
         # attach entity context to final context
         final_context_text = entity_context + "\n\n" + "\n\n".join(final_context)
         final_context_data["entities"] = entity_context_data

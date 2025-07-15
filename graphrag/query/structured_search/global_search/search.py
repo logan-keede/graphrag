@@ -102,14 +102,17 @@ class GlobalSearch(BaseSearch[GlobalContextBuilder]):
         conversation_history: ConversationHistory | None = None,
     ) -> AsyncGenerator[str, None]:
         """Stream the global search response."""
+        # breakpoint()
         context_result = await self.context_builder.build_context(
             query=query,
             conversation_history=conversation_history,
             **self.context_builder_params,
         )
+        # print(context_result)
         for callback in self.callbacks:
             callback.on_map_response_start(context_result.context_chunks)  # type: ignore
-
+        print(context_result.context_chunks)
+        breakpoint()
         map_responses = await asyncio.gather(*[
             self._map_response_single_batch(
                 context_data=data,
@@ -155,6 +158,7 @@ class GlobalSearch(BaseSearch[GlobalContextBuilder]):
             conversation_history=conversation_history,
             **self.context_builder_params,
         )
+        # breakpoint()
         llm_calls["build_context"] = context_result.llm_calls
         prompt_tokens["build_context"] = context_result.prompt_tokens
         output_tokens["build_context"] = context_result.output_tokens
@@ -189,7 +193,7 @@ class GlobalSearch(BaseSearch[GlobalContextBuilder]):
         llm_calls["reduce"] = reduce_response.llm_calls
         prompt_tokens["reduce"] = reduce_response.prompt_tokens
         output_tokens["reduce"] = reduce_response.output_tokens
-
+        
         return GlobalSearchResult(
             response=reduce_response.response,
             context_data=context_result.context_records,
@@ -220,6 +224,7 @@ class GlobalSearch(BaseSearch[GlobalContextBuilder]):
             search_prompt = self.map_system_prompt.format(
                 context_data=context_data, max_length=max_length
             )
+            print(search_prompt)
             search_messages = [
                 {"role": "system", "content": search_prompt},
             ]
@@ -375,6 +380,7 @@ class GlobalSearch(BaseSearch[GlobalContextBuilder]):
                 response_type=self.response_type,
                 max_length=self.reduce_max_length,
             )
+            log.info(search_prompt)
             if self.allow_general_knowledge:
                 search_prompt += "\n" + self.general_knowledge_inclusion_prompt
             search_messages = [
@@ -435,7 +441,7 @@ class GlobalSearch(BaseSearch[GlobalContextBuilder]):
                     "answer": element["answer"],
                     "score": element["score"],
                 })
-
+        print(key_points, map_responses)
         # filter response with score = 0 and rank responses by descending order of score
         filtered_key_points = [
             point
@@ -480,6 +486,7 @@ class GlobalSearch(BaseSearch[GlobalContextBuilder]):
             response_type=self.response_type,
             max_length=max_length,
         )
+        print('search_prompt', search_prompt)
         if self.allow_general_knowledge:
             search_prompt += "\n" + self.general_knowledge_inclusion_prompt
         search_messages = [

@@ -501,6 +501,12 @@ def _query_cli(
         "--streaming/--no-streaming",
         help="Print the response in a streaming manner.",
     ),
+    entities: list[str] = typer.Option(
+        None,
+        "--entities",
+        help="Enter Entities to do path and depth search on"
+    ),
+    
 ) -> None:
     """Query a knowledge graph index."""
     from graphrag.cli.query import (
@@ -508,6 +514,7 @@ def _query_cli(
         run_drift_search,
         run_global_search,
         run_local_search,
+        run_rffg_search,
     )
 
     match method:
@@ -549,6 +556,17 @@ def _query_cli(
                 root_dir=root,
                 streaming=streaming,
                 query=query,
+            )
+        case SearchMethod.RFFG:
+            run_rffg_search(
+                config_filepath=config,
+                data_dir=data,
+                root_dir=root,
+                streaming=streaming,
+                query=query,
+                response_type=response_type,
+                community_level=community_level,
+                entities=entities
             )
         case _:
             raise ValueError(INVALID_METHOD_ERROR)

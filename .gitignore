@@ -18,6 +18,7 @@ output/lancedb
 *.log*
 .venv
 venv/
+env/
 .conda
 .tmp
 
@@ -41,7 +42,7 @@ ragtest/
 .ragtest/
 .pipelines
 .pipeline
-
+ragtest_mini
 
 # mkdocs
 site/
@@ -56,3 +57,6 @@ docsite/
 
 # Jupyter notebook
 .ipynb_checkpoints/
+Untitled.ipynb 
+entities.parquet
+entities_1000.parquet

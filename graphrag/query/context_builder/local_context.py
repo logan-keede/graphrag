@@ -72,8 +72,8 @@ def build_entity_context(
             new_context.append(field_value)
         new_context_text = column_delimiter.join(new_context) + "\n"
         new_tokens = num_tokens(new_context_text, token_encoder)
-        if current_tokens + new_tokens > max_context_tokens:
-            break
+        # if current_tokens + new_tokens > max_context_tokens:
+        #     break
         current_context_text += new_context_text
         all_context_records.append(new_context)
         current_tokens += new_tokens

@@ -99,7 +99,7 @@ class GlobalCommunityContext(GlobalContextBuilder):
             llm_calls += dynamic_info["llm_calls"]
             prompt_tokens += dynamic_info["prompt_tokens"]
             output_tokens += dynamic_info["output_tokens"]
-
+        # breakpoint()
         community_context, community_context_data = build_community_context(
             community_reports=community_reports,
             entities=self.entities,

@@ -63,7 +63,8 @@ async def summarize_communities(
             max_context_tokens=max_input_length,
         )
         level_contexts.append(level_context)
-
+    print(0, sum(list(map(len, level_contexts))))
+    
     for level_context in level_contexts:
 
         async def run_generate(record):
@@ -101,6 +102,33 @@ async def _generate_report(
     community_context: str,
 ) -> CommunityReport | None:
     """Generate a report for a single community."""
+    # return None
+    # print(community_context)
+    print(CommunityReport(
+            community=community_id,
+            full_content=community_context,
+            level=community_level,
+            rank=1,
+            title=community_context,
+            rating_explanation=community_context,
+            summary=community_context,
+            findings=[
+            ],
+            full_content_json="",
+        ))
+    # breakpoint()
+    return CommunityReport(
+            community=community_id,
+            full_content=community_context,
+            level=community_level,
+            rank=1,
+            title=community_context,
+            rating_explanation=community_context,
+            summary=community_context,
+            findings=[
+            ],
+            full_content_json="",
+        )
     return await runner(
         community_id,
         community_context,

@@ -23,6 +23,7 @@ from graphrag.config.models.extract_claims_config import ClaimExtractionConfig
 from graphrag.config.models.extract_graph_config import ExtractGraphConfig
 from graphrag.config.models.extract_graph_nlp_config import ExtractGraphNLPConfig
 from graphrag.config.models.global_search_config import GlobalSearchConfig
+from graphrag.config.models.rffg_search_config import RFFGSearchConfig
 from graphrag.config.models.input_config import InputConfig
 from graphrag.config.models.language_model_config import LanguageModelConfig
 from graphrag.config.models.local_search_config import LocalSearchConfig
@@ -270,6 +271,11 @@ class GraphRagConfig(BaseModel):
         default=SnapshotsConfig(),
     )
     """The snapshots configuration to use."""
+
+    rffg_search: RFFGSearchConfig = Field(
+        description="The local search configuration.", default=LocalSearchConfig()
+    )
+    """The local search configuration."""
 
     local_search: LocalSearchConfig = Field(
         description="The local search configuration.", default=LocalSearchConfig()

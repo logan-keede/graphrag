@@ -119,3 +119,26 @@ def find_nearest_neighbors_by_entity_rank(
     if k:
         return top_relations[:k]
     return top_relations
+
+def full_text_search(
+    query: str,
+    all_entities_dict: dict[str, Entity],
+    k: int,
+    graphdb_driver, 
+    ):
+    all_entities = list(all_entities_dict.values())
+    matched_entities = []
+    if query!="":
+        graphdb_query =f"""
+        CALL db.index.fulltext.queryNodes("fulltext", '\\\\"{query}~\\\\"') YIELD node, score
+        RETURN node.id, score LIMIT {k}
+        """
+        search_results = graphdb_driver.execute_query(graphdb_query)[0]
+        for result in search_results:
+            matched = get_entity_by_id(all_entities_dict, result['node.id'])
+            if matched:
+                matched_entities.append(matched)
+    # else:
+    #     # all_entities.sort(key=lambda x: x.rank if x.rank else 0, reverse=True)
+    #     matched_entities = all_entities[:k]
+    return matched_entities
