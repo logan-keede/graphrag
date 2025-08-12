@@ -70,7 +70,7 @@ class RFFGSearch(BaseSearch[LocalContextBuilder]):
         prompt_tokens["build_context"] = context_result.prompt_tokens
         output_tokens["build_context"] = context_result.output_tokens
         
-        if self.context_builder_params.get("relevant_entities_only", True):
+        if not self.context_builder_params.get("selected_entities", []):
             print(context_result.context_chunks)
             breakpoint()
             return 
@@ -161,7 +161,7 @@ class RFFGSearch(BaseSearch[LocalContextBuilder]):
             conversation_history=conversation_history,
             **self.context_builder_params,
         )
-        if self.context_builder_params.get("relevant_entities_only", True):
+        if not self.context_builder_params.get("selected_entities", []):
             yield context_result.context_chunks
             return 
             # yield context_result.context_chunks
@@ -188,7 +188,7 @@ class RFFGSearch(BaseSearch[LocalContextBuilder]):
         history_messages = [
             {"role": "system", "content": search_prompt},
         ]
-        # print("search prompt", search_prompt)
+        print("search prompt", search_prompt)
         for callback in self.callbacks:
             callback.on_context(context_result.context_records)
 
