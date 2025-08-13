@@ -3,18 +3,39 @@ This fork of graphrag implements a more approach to traditional graphrag, it sto
 This method only requires Graph Extraction(better yet, bring you own graph),indexing vector embeddings for entities, and indexing relationships and entities in graphDB(neo4j).  
 
 Insights and good Practices: -
-1. Currently the traversal is undirected, which means non relevant relationships may be accepted in during path search or radial depth search. To improve context make sure every relationship which has a valuable inverse is explicitly indexed in graphdb and then switch to directed traversal.
-eg. 
+1. Currently, the graph traversal is **undirected**, meaning relationships can be followed in both directions. This often leads to irrelevant or misleading connections being included during path search or radial depth search.
 
-Bad context: Blood Test -- Has Intent of --> Diagnosis <-- Has Intent of -- X Ray.    
+**Example of bad context (undirected traversal problem):**
 
-Good context: High Sugar in blood -- Symptom of --> Diabetes <-- causes --Genetics.
+```
+Blood Test -- Has Intent of --> Diagnosis <-- Has Intent of -- X Ray
+```
 
-Desired Context: High Sugar in blood -- Symptom of --> Diabetes -- caused by --> Genetics.
+Here, the traversal might connect *Blood Test* to *X Ray* via “Diagnosis” even though this link isn’t contextually relevant.
 
-In the above examples, Undirected Traversal may include a path from `Blood test` to `Xray` which is undesirable, but Directed Traversal may eliminate path between `High Sugar` and `Genetics` which is also undesirable. Note that original data set may not have `caused by` relationship. In above example inverse of `causes` relationship should be added to graphdb.   
+Switching to **directed traversal** would improve relevance by following only the intended direction of relationships. However, this introduces a new problem: if the dataset lacks inverse relationships, some meaningful paths get lost.
 
-2. Depending on depth parameter Number of Path and relevant entities filtered and subsequent context may be too large, it is better to let the user decide which entity they want to use for traversal for more economic viability. 
+**Example of lost context with naïve directed traversal:**
+
+```
+High Sugar in blood -- Symptom of --> Diabetes <-- causes -- Genetics
+```
+
+Directed traversal here cannot find a path from *High Sugar in blood* to *Genetics*, because there’s no *caused by* edge from *Diabetes* to *Genetics*.
+
+**Proposed solution:**
+Before switching to directed traversal, ensure that every relationship type with a valuable or semantically valid inverse is **explicitly indexed in the graph**. For example, if *A causes B* exists, also add *B caused by A*.
+
+**Desired context after adding inverses:**
+
+```
+High Sugar in blood -- Symptom of --> Diabetes -- caused by --> Genetics
+```
+
+This way, traversal remains both **precise** (avoiding irrelevant hops) and **complete** (retaining important connections).
+
+2. Depending on depth parameter Number of Path and relevant entities filtered and subsequent context may be too large, it is better to let the user decide which entity they want to use for traversal for more economic viability.
+
 
 Usage: Data - SNOMED-CT
 ```bash
